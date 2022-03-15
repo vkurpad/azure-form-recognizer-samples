@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32126.315
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDKSample_v3.0API", "SDKSample_v3.0API.csproj", "{AA70BD55-A6E5-4FEF-99A9-4382E9540A30}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AA70BD55-A6E5-4FEF-99A9-4382E9540A30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA70BD55-A6E5-4FEF-99A9-4382E9540A30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA70BD55-A6E5-4FEF-99A9-4382E9540A30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA70BD55-A6E5-4FEF-99A9-4382E9540A30}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3131B911-60AB-469A-A2F8-A0329451943B}
+	EndGlobalSection
+EndGlobal
