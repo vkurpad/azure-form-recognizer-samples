@@ -101,6 +101,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
              "Invalid body",
              status_code=400
         )
+    except Exception as e:
+        return func.HttpResponse(
+             "Invalid body",
+             status_code=400
+        )
 def compose_response(json_data):
     values = json.loads(json_data)['values']
     
@@ -111,8 +116,11 @@ def compose_response(json_data):
     key = os.environ["FORMS_RECOGNIZER_KEY"]
     for value in values:
         output_record = analyze_document(endpoint=endpoint, key=key, data=value["data"])
-        
-        results["values"].append(output_record)
+        record = {
+            "recordId": value["recordId"],
+            "data": output_record
+        }
+        results["values"].append(record)
     return json.dumps(results, ensure_ascii=False, cls=DateTimeEncoder)
 
 def analyze_document(endpoint, key, data):
@@ -136,6 +144,10 @@ def analyze_document(endpoint, key, data):
             "entities" : get_entities(result),
             "tables": get_tables(result),
             "pages": get_pages(result)
+        }
+    elif model == "prebuilt-read":
+        output_record = { 
+            "content": result.content
         }
     elif model == "prebuilt-receipt":
         output_record = { 

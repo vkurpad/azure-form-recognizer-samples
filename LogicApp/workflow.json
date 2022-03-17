@@ -1,0 +1,235 @@
+{
+    "id": "/subscriptions/c321e027-5cae-483f-ba4e-3b7d96460359/resourceGroups/vikurpad-demos/providers/Microsoft.Web/sites/vikurpad-demo-logic/workflows/Invoicev3",
+    "name": "vikurpad-demo-logic/Invoicev3",
+    "type": "Microsoft.Web/sites/workflows",
+    "kind": "Stateful",
+    "location": "West US 2",
+    "properties": {
+        "files": {
+            "workflow.json": {
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "actions": {
+                        "Create_SAS_URI_by_path_(V2)": {
+                            "inputs": {
+                                "body": {
+                                    "Permissions": "Read"
+                                },
+                                "host": {
+                                    "connection": {
+                                        "referenceName": "azureblob_4"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/v2/datasets/@{encodeURIComponent('AccountNameFromSettings')}/CreateSharedLinkByPath",
+                                "queries": {
+                                    "path": "@{triggerOutputs()?['body']?['containerInfo']?['name']}/@{triggerOutputs()?['body']?['name']}"
+                                }
+                            },
+                            "runAfter": {},
+                            "type": "ApiConnection"
+                        },
+                        "For_each": {
+                            "actions": {
+                                "Compose_2": {
+                                    "inputs": {
+                                        "docType": "@items('For_each')?['docType']",
+                                        "fields": "@items('For_each')?['fields']",
+                                        "id": "@triggerOutputs()?['body']?['name']"
+                                    },
+                                    "runAfter": {},
+                                    "type": "Compose"
+                                },
+                                "Create_or_update_document_(V3)": {
+                                    "inputs": {
+                                        "body": "@outputs('Compose_2')",
+                                        "host": {
+                                            "connection": {
+                                                "referenceName": "documentdb"
+                                            }
+                                        },
+                                        "method": "post",
+                                        "path": "/v2/cosmosdb/@{encodeURIComponent('AccountNameFromSettings')}/dbs/@{encodeURIComponent('formsrec-results')}/colls/@{encodeURIComponent('invoicesv3')}/docs"
+                                    },
+                                    "runAfter": {
+                                        "Compose_2": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ApiConnection"
+                                }
+                            },
+                            "foreach": "@body('Parse_JSON')?['analyzeResult']?['documents']",
+                            "runAfter": {
+                                "Until": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Foreach"
+                        },
+                        "HTTP": {
+                            "inputs": {
+                                "body": {
+                                    "urlSource": "@body('Create_SAS_URI_by_path_(V2)')?['WebUrl']"
+                                },
+                                "headers": {
+                                    "Content-Type": "application/json",
+                                    "Ocp-Apim-Subscription-Key": "6e2906512a9e41809c5b60d20a8ab29b"
+                                },
+                                "method": "POST",
+                                "uri": "https://vikurpad-demo.cognitiveservices.azure.com/formrecognizer/documentModels/prebuilt-invoice:analyze?api-version=2021-11-30-preview"
+                            },
+                            "runAfter": {
+                                "Create_SAS_URI_by_path_(V2)": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Http"
+                        },
+                        "Initialize_variable": {
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "operation-location",
+                                        "type": "string",
+                                        "value": "@{outputs('HTTP')['headers']}[Operation-location]"
+                                    }
+                                ]
+                            },
+                            "runAfter": {
+                                "HTTP": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable"
+                        },
+                        "Parse_JSON_2": {
+                            "inputs": {
+                                "content": "@outputs('HTTP')['headers']",
+                                "schema": {
+                                    "properties": {
+                                        "Content-Length": {
+                                            "type": "string"
+                                        },
+                                        "Date": {
+                                            "type": "string"
+                                        },
+                                        "Operation-Location": {
+                                            "type": "string"
+                                        },
+                                        "Strict-Transport-Security": {
+                                            "type": "string"
+                                        },
+                                        "X-Content-Type-Options": {
+                                            "type": "string"
+                                        },
+                                        "apim-request-id": {
+                                            "type": "string"
+                                        },
+                                        "x-envoy-upstream-service-time": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            },
+                            "runAfter": {
+                                "Initialize_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ParseJson"
+                        },
+                        "Until": {
+                            "actions": {
+                                "Delay": {
+                                    "inputs": {
+                                        "interval": {
+                                            "count": 10,
+                                            "unit": "Second"
+                                        }
+                                    },
+                                    "runAfter": {},
+                                    "type": "Wait"
+                                },
+                                "HTTP_2": {
+                                    "inputs": {
+                                        "headers": {
+                                            "Ocp-Apim-Subscription-Key": "6e2906512a9e41809c5b60d20a8ab29b"
+                                        },
+                                        "method": "GET",
+                                        "uri": "@body('Parse_JSON_2')?['Operation-Location']"
+                                    },
+                                    "runAfter": {
+                                        "Delay": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "Http"
+                                },
+                                "Parse_JSON": {
+                                    "inputs": {
+                                        "content": "@body('HTTP_2')",
+                                        "schema": {
+                                            "properties": {
+                                                "createdDateTime": {
+                                                    "type": "string"
+                                                },
+                                                "lastUpdatedDateTime": {
+                                                    "type": "string"
+                                                },
+                                                "status": {
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "runAfter": {
+                                        "HTTP_2": [
+                                            "Succeeded"
+                                        ]
+                                    },
+                                    "type": "ParseJson"
+                                }
+                            },
+                            "expression": "@equals(body('Parse_JSON')?['status'], 'succeeded')",
+                            "limit": {
+                                "count": 60,
+                                "timeout": "PT1H"
+                            },
+                            "runAfter": {
+                                "Parse_JSON_2": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Until"
+                        }
+                    },
+                    "contentVersion": "1.0.0.0",
+                    "outputs": {},
+                    "triggers": {
+                        "When_a_blob_is_Added_or_Modified_in_Azure_Storage": {
+                            "inputs": {
+                                "parameters": {
+                                    "path": "invoicev3"
+                                },
+                                "serviceProviderConfiguration": {
+                                    "connectionName": "AzureBlob-2",
+                                    "operationId": "whenABlobIsAddedOrModified",
+                                    "serviceProviderId": "/serviceProviders/AzureBlob"
+                                }
+                            },
+                            "type": "ServiceProvider"
+                        }
+                    }
+                },
+                "kind": "Stateful"
+            }
+        },
+        "flowState": 2,
+        "health": {
+            "state": 1
+        }
+    }
+}
