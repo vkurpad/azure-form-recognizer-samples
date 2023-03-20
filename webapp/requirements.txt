@@ -1,0 +1,6 @@
+flask
+azure-storage-blob
+requests
+azure-cosmos
+azure-mgmt-cosmosdb
+azure-ai-formrecognizer

@@ -1,0 +1,75 @@
+{% extends "layout.html" %}
+{% block title %}
+Home
+{% endblock %}
+{% block content %}
+<div class="container-fluid px-4">
+{% if method == "POST" %}
+
+        <div> Successfully processed file</div>
+        <div> <a href="{{ ref }}">Download</a> {{ref}}</div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                DataTable Example
+            </div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                            <th>Confidence</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Key</th>
+                            <th>Value</th>
+                            <th>Confidence</th>
+                            
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for item in kv_pair %}
+                        <tr>
+                            <td>{{item.key.content}}</td>
+                            <td>{{item.value.content}}</td>
+                            <td>{{item.confidence}}</td>
+                        
+                        </tr>
+                        
+                        {% endfor %}
+                        
+                        
+                    </tbody>
+                </table>
+                <br>
+            </div>
+        </div>
+
+    
+{% else %}
+
+<br>
+<div class="row">
+    <div class="container-fluid px-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                Upload a document
+            </div>
+            <div class="card-body">
+                <form action="" method=post enctype=multipart/form-data>
+                    <p><input type=file name=file>
+                    <input type=submit value=Upload>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+</div>
+{% endblock content %}
